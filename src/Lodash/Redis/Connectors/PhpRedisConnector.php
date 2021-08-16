@@ -84,6 +84,11 @@ class PhpRedisConnector extends BasePhpRedisConnector
                 $client->setOption(Redis::OPT_SERIALIZER, (string) $serializer);
             }
 
+            if (! empty($config['compression'])) {
+                $compression = $this->getCompressionFromConfig($config['compression']);
+                $client->setOption(Redis::OPT_COMPRESSION, (string) $compression);
+            }
+
             if (empty($config['scan'])) {
                 $client->setOption(Redis::OPT_SCAN, (string) Redis::SCAN_RETRY);
             }
@@ -142,6 +147,11 @@ class PhpRedisConnector extends BasePhpRedisConnector
             $client->setOption(Redis::OPT_SERIALIZER, (string) $serializer);
         }
 
+        if (! empty($options['compression'])) {
+            $compression = $this->getCompressionFromConfig($options['compression']);
+            $client->setOption(Redis::OPT_COMPRESSION, (string) $compression);
+        }
+
         return $client;
     }
 
@@ -166,6 +176,32 @@ class PhpRedisConnector extends BasePhpRedisConnector
                 break;
             default:
                 $flag = Redis::SERIALIZER_NONE;
+                break;
+        }
+
+        return $flag;
+    }
+
+    /**
+     * Resolve compression
+     *
+     * @param  string $compression
+     * @return int
+     */
+    protected function getCompressionFromConfig(string $compression): int
+    {
+        switch ($compression) {
+            case 'lzf':
+                $flag = Redis::COMPRESSION_LZF;
+                break;
+            case 'zstd':
+                $flag = Redis::COMPRESSION_ZSTD;
+                break;
+            case 'lz4':
+                $flag = Redis::COMPRESSION_LZ4;
+                break;
+            default:
+                $flag = Redis::COMPRESSION_NONE;
                 break;
         }
 
